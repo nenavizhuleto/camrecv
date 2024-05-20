@@ -18,7 +18,7 @@
 
 static const int magic = 1337;
 static const char* out_image = "out.jpeg";
-static const char* out_stream = "rtsp://localhost:8554/stream"
+static const char* out_stream = "rtsp://localhost:8554/stream";
 
 int handle_socket_connection(int client) {
 	static const size_t max_buf_size = 64 * 1024;
