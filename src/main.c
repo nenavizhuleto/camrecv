@@ -56,8 +56,6 @@ int handle_socket_connection(int client) {
 			"1",
 			"-i", 
 			out_image,
-			"-c:v",
-			"libx264",
 			"-f",
 			"rtsp",
 			out_stream,
