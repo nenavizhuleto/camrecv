@@ -30,16 +30,14 @@ int handle_socket_connection(int client) {
 
 	if (send(client, &magic, sizeof(int), 0) < 0) {
 		printf("failed to establish connection with client\n");
-		//return 1;
-		pthread_exit(1);
+		goto error;
 	}
 
 	printf("successfully establish connection with client\n");
 
 	if ((fd = fopen(out_image, "wb")) == NULL) {
 		printf("failed to create %s file\n", out_image);
-		//return 1;
-		pthread_exit(1);
+		goto error;
 	}
 
 	fclose(fd);
@@ -62,7 +60,7 @@ int handle_socket_connection(int client) {
 			NULL
 		) < 0) {
 			printf("failed to start ffmpeg process: %s\n", strerror(errno));
-			pthread_exit(1);
+			goto error;
 		}
 	}
 
@@ -71,17 +69,17 @@ int handle_socket_connection(int client) {
 	for (;;) {
 		if (recv(client, &len, sizeof(unsigned char) * 2, MSG_WAITALL) < 0) {
 			printf("failed to receive len-message\n");
-			break;
+			goto error;
 		}
 
 		if (send(client, &magic, sizeof(int), 0) < 0) {
 			printf("failed to ACK message\n");
-			break;
+			goto error;
 		}
 
 		if ((n = recv(client, buf, len + 2, MSG_WAITALL)) < 0) {
 			printf("failed to read data from client: %s\n", strerror(errno));
-			break;
+			goto error;
 		}
 
 		printf("received data: %d\n", n);
@@ -89,8 +87,7 @@ int handle_socket_connection(int client) {
 		int fd = open(out_image, O_WRONLY);
 		if (fd < 0) {
 			printf("failed to open image file: %s\n", out_image);
-			//return 1;
-			pthread_exit(1);
+			goto error;
 		}
 
 		if (write(fd, buf, n + 2) < 0) {
@@ -102,12 +99,15 @@ int handle_socket_connection(int client) {
 		// sync client
 		if (send(client, &magic, sizeof(int), 0) < 0) {
 			printf("failed to ACK message\n");
-			break;
+			goto error;
 		}
 	}
 
 	pthread_exit(0);
-	//return 0;
+
+error:
+	close(client);
+	pthread_exit(1);
 }
 
 int main(void) {
