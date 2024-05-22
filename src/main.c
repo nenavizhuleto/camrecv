@@ -21,7 +21,7 @@ static const char* out_image = "out.jpeg";
 static const char* out_stream = "rtsp://localhost:8554/stream";
 
 int handle_socket_connection(int client) {
-	static const size_t max_buf_size = 64 * 1024;
+	static const size_t max_buf_size = 1600 * 1200;
 
 	char buf[max_buf_size];
 	FILE *fd = NULL;
